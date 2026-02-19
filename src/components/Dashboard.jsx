@@ -475,6 +475,15 @@ const applyThemeToSnippet = (snippet, preset) => {
   return themed;
 };
 
+const parseTitleFallback = (title = "") => {
+  const parts = title.split("•").map((item) => item.trim());
+  return {
+    category: parts[0] || "navbar",
+    styleId: parts[1] || "aurora",
+    framework: parts[2] || "html",
+  };
+};
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const [user, setUser] = React.useState(null);
@@ -522,6 +531,48 @@ export default function Dashboard() {
       // Ignore malformed local data
     }
   }, []);
+
+  React.useEffect(() => {
+    const loadCloudWorks = async () => {
+      if (!user?.id) return;
+      const { data, error } = await supabase
+        .from("projects")
+        .select("id,name,content,framework,category,updated_at")
+        .eq("user_id", user.id)
+        .order("updated_at", { ascending: false })
+        .limit(30);
+
+      if (error || !Array.isArray(data)) return;
+
+      const cloudWorks = data.map((row) => {
+        const fallback = parseTitleFallback(row.name || "");
+        return {
+          id: `cloud-${row.id}`,
+          title: row.name || `${fallback.category} • ${fallback.styleId} • ${fallback.framework}`,
+          category: row.category || fallback.category,
+          styleId: fallback.styleId,
+          framework: row.framework || fallback.framework,
+          code: row.content || "",
+          updatedAt: row.updated_at || new Date().toISOString(),
+        };
+      });
+
+      setSavedWorks((prev) => {
+        const merged = [...cloudWorks, ...prev];
+        const unique = [];
+        const seen = new Set();
+        for (const item of merged) {
+          const key = `${item.title}-${item.updatedAt}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          unique.push(item);
+        }
+        return unique.slice(0, 30);
+      });
+    };
+
+    loadCloudWorks();
+  }, [user?.id]);
 
   React.useEffect(() => {
     if (!getStyleOptions(category).some((item) => item.id === styleId)) {
@@ -603,13 +654,26 @@ export default function Dashboard() {
     window.localStorage.setItem(LOCAL_SAVED_WORKS_KEY, JSON.stringify(nextWorks));
 
     if (user?.id) {
-      await supabase.from("projects").insert({
+      const { data, error } = await supabase
+        .from("projects")
+        .insert({
         user_id: user.id,
         name: entry.title,
         content: entry.code,
         framework: entry.framework,
         category: entry.category,
-      });
+      })
+        .select("id,updated_at")
+        .single();
+
+      if (!error && data?.id) {
+        const cloudEntry = {
+          ...entry,
+          id: `cloud-${data.id}`,
+          updatedAt: data.updated_at || entry.updatedAt,
+        };
+        setSavedWorks((prev) => [cloudEntry, ...prev].slice(0, 30));
+      }
     }
 
     setSaveLabel("Sauvegarde");
