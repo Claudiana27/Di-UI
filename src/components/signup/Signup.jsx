@@ -1,10 +1,13 @@
 import React from "react";
-import { Container, Box } from "@mui/material";
+import { Container, Box, IconButton } from "@mui/material";
+import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
+import { useNavigate } from "react-router-dom";
 import SignupForm from "./SignupForm";
 import SignupHero from "./SignupHero";
 
 
 export default function Signup() {
+  const navigate = useNavigate();
 
   return (
       <Container position= "static" sx={{
@@ -20,6 +23,26 @@ export default function Signup() {
         height: "100dvh",
         overflow: "hidden",
       }}>
+      <IconButton
+        onClick={() => navigate("/")}
+        sx={{
+          position: "absolute",
+          top: { xs: 10, md: 16 },
+          left: { xs: 12, md: 20 },
+          zIndex: 20,
+          color: "#dbeafe",
+          width: 34,
+          height: 34,
+          borderRadius: "50%",
+          border: "1px solid rgba(125, 211, 252, 0.35)",
+          background: "rgba(15, 23, 42, 0.45)",
+          "&:hover": {
+            background: "rgba(15, 23, 42, 0.7)",
+          },
+        }}
+      >
+        <ArrowBackRoundedIcon fontSize="small" />
+      </IconButton>
       <Box
         sx={{
           position: "relative",

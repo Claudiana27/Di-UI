@@ -1,8 +1,10 @@
-import {useState} from "react"
+import { useRef, useState } from "react"
 import {Box} from "@mui/material"
 
 export default function Carousel(){
     const[rotation, setRotation] = useState(0);
+    const touchStartX = useRef(null);
+    const touchStartRotation = useRef(0);
 
     const items = [
         { name: "React", image: "/react.png", docUrl: "https://react.dev/" },
@@ -19,6 +21,25 @@ export default function Carousel(){
         const percent = (x / width) * 360 
         setRotation(percent)
     }
+
+    const handleTouchStart = (e) => {
+      const touch = e.touches[0];
+      if (!touch) return;
+      touchStartX.current = touch.clientX;
+      touchStartRotation.current = rotation;
+    };
+
+    const handleTouchMove = (e) => {
+      const touch = e.touches[0];
+      if (!touch || touchStartX.current === null) return;
+      const deltaX = touch.clientX - touchStartX.current;
+      const sensitivity = 0.4;
+      setRotation(touchStartRotation.current + deltaX * sensitivity);
+    };
+
+    const handleTouchEnd = () => {
+      touchStartX.current = null;
+    };
 
     const step = 360 / items.length
 
@@ -46,6 +67,9 @@ export default function Carousel(){
     return(
         <Box
         onMouseMove={handleMouseMove}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
         onKeyDown={(event) => {
           if (event.key === "Enter") {
             event.preventDefault();
@@ -62,7 +86,8 @@ export default function Carousel(){
             alignItems: "center",
             justifyContent: "center",
             mt: { xs: -2, sm: -4, md: -12 },
-            overflow: "hidden"
+            overflow: "hidden",
+            touchAction: "pan-y",
         }}>
            
            <Box sx={{ 
