@@ -484,6 +484,20 @@ const parseTitleFallback = (title = "") => {
   };
 };
 
+const dedupeWorksByTitle = (works) => {
+  const unique = [];
+  const seen = new Set();
+  for (const item of works) {
+    if (!item?.title) continue;
+    if (seen.has(item.title)) continue;
+    seen.add(item.title);
+    unique.push(item);
+  }
+  return unique
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+    .slice(0, 30);
+};
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const [user, setUser] = React.useState(null);
@@ -500,6 +514,7 @@ export default function Dashboard() {
   const [savedPanelOpen, setSavedPanelOpen] = React.useState(false);
   const [saveLabel, setSaveLabel] = React.useState("Sauvegarder");
   const [themeKey, setThemeKey] = React.useState("ocean");
+  const [cloudMessage, setCloudMessage] = React.useState("");
 
   React.useEffect(() => {
     let isMounted = true;
@@ -537,21 +552,26 @@ export default function Dashboard() {
       if (!user?.id) return;
       const { data, error } = await supabase
         .from("projects")
-        .select("id,name,content,framework,category,updated_at")
+        .select("id,name,content,updated_at")
         .eq("user_id", user.id)
         .order("updated_at", { ascending: false })
         .limit(30);
 
-      if (error || !Array.isArray(data)) return;
+      if (error || !Array.isArray(data)) {
+        setCloudMessage("Cloud indisponible: table/projects ou policies a verifier.");
+        return;
+      }
+
+      setCloudMessage("");
 
       const cloudWorks = data.map((row) => {
         const fallback = parseTitleFallback(row.name || "");
         return {
           id: `cloud-${row.id}`,
           title: row.name || `${fallback.category} • ${fallback.styleId} • ${fallback.framework}`,
-          category: row.category || fallback.category,
+          category: fallback.category,
           styleId: fallback.styleId,
-          framework: row.framework || fallback.framework,
+          framework: fallback.framework,
           code: row.content || "",
           updatedAt: row.updated_at || new Date().toISOString(),
         };
@@ -559,15 +579,9 @@ export default function Dashboard() {
 
       setSavedWorks((prev) => {
         const merged = [...cloudWorks, ...prev];
-        const unique = [];
-        const seen = new Set();
-        for (const item of merged) {
-          const key = `${item.title}-${item.updatedAt}`;
-          if (seen.has(key)) continue;
-          seen.add(key);
-          unique.push(item);
-        }
-        return unique.slice(0, 30);
+        const finalList = dedupeWorksByTitle(merged);
+        window.localStorage.setItem(LOCAL_SAVED_WORKS_KEY, JSON.stringify(finalList));
+        return finalList;
       });
     };
 
@@ -641,7 +655,7 @@ export default function Dashboard() {
 
   const handleSaveCurrentWork = async () => {
     const entry = {
-      id: `${Date.now()}`,
+      id: `local-${Date.now()}`,
       title: `${category} • ${styleId} • ${framework}`,
       category,
       styleId,
@@ -649,30 +663,73 @@ export default function Dashboard() {
       code,
       updatedAt: new Date().toISOString(),
     };
-    const nextWorks = [entry, ...savedWorks.filter((item) => item.id !== entry.id)].slice(0, 30);
+    const nextWorks = dedupeWorksByTitle([entry, ...savedWorks]);
     setSavedWorks(nextWorks);
     window.localStorage.setItem(LOCAL_SAVED_WORKS_KEY, JSON.stringify(nextWorks));
 
     if (user?.id) {
-      const { data, error } = await supabase
+      const { data: existingRows, error: existingError } = await supabase
         .from("projects")
-        .insert({
-        user_id: user.id,
-        name: entry.title,
-        content: entry.code,
-        framework: entry.framework,
-        category: entry.category,
-      })
-        .select("id,updated_at")
-        .single();
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("name", entry.title)
+        .limit(1);
 
-      if (!error && data?.id) {
-        const cloudEntry = {
-          ...entry,
-          id: `cloud-${data.id}`,
-          updatedAt: data.updated_at || entry.updatedAt,
-        };
-        setSavedWorks((prev) => [cloudEntry, ...prev].slice(0, 30));
+      if (existingError) {
+        setCloudMessage("Sauvegarde locale OK, cloud en erreur.");
+      } else if (existingRows?.[0]?.id) {
+        const existingId = existingRows[0].id;
+        const { data, error } = await supabase
+          .from("projects")
+          .update({
+            content: entry.code,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", existingId)
+          .select("id,updated_at")
+          .single();
+
+        if (!error && data?.id) {
+          const cloudEntry = {
+            ...entry,
+            id: `cloud-${data.id}`,
+            updatedAt: data.updated_at || entry.updatedAt,
+          };
+          setSavedWorks((prev) => {
+            const finalList = dedupeWorksByTitle([cloudEntry, ...prev]);
+            window.localStorage.setItem(LOCAL_SAVED_WORKS_KEY, JSON.stringify(finalList));
+            return finalList;
+          });
+          setCloudMessage("Sauvegarde cloud OK.");
+        } else {
+          setCloudMessage("Sauvegarde locale OK, cloud en erreur.");
+        }
+      } else {
+        const { data, error } = await supabase
+          .from("projects")
+          .insert({
+          user_id: user.id,
+          name: entry.title,
+          content: entry.code,
+        })
+          .select("id,updated_at")
+          .single();
+
+        if (!error && data?.id) {
+          const cloudEntry = {
+            ...entry,
+            id: `cloud-${data.id}`,
+            updatedAt: data.updated_at || entry.updatedAt,
+          };
+          setSavedWorks((prev) => {
+            const finalList = dedupeWorksByTitle([cloudEntry, ...prev]);
+            window.localStorage.setItem(LOCAL_SAVED_WORKS_KEY, JSON.stringify(finalList));
+            return finalList;
+          });
+          setCloudMessage("Sauvegarde cloud OK.");
+        } else {
+          setCloudMessage("Sauvegarde locale OK, cloud en erreur.");
+        }
       }
     }
 
@@ -690,10 +747,15 @@ export default function Dashboard() {
     setSavedPanelOpen(false);
   };
 
-  const handleDeleteSavedWork = (id) => {
+  const handleDeleteSavedWork = async (id) => {
     const next = savedWorks.filter((item) => item.id !== id);
     setSavedWorks(next);
     window.localStorage.setItem(LOCAL_SAVED_WORKS_KEY, JSON.stringify(next));
+
+    if (id.startsWith("cloud-")) {
+      const cloudId = id.replace("cloud-", "");
+      await supabase.from("projects").delete().eq("id", cloudId);
+    }
   };
 
   return (
@@ -1036,6 +1098,11 @@ export default function Dashboard() {
         </Box>
         <Divider sx={{ borderColor: "rgba(148, 163, 184, 0.18)" }} />
         <List sx={{ p: 1 }}>
+          {cloudMessage && (
+            <Typography sx={{ px: 1.2, pb: 1.2, color: "#fcd34d", fontSize: 12 }}>
+              {cloudMessage}
+            </Typography>
+          )}
           {savedWorks.length === 0 && (
             <Typography sx={{ px: 1.2, py: 2, color: "#94a3b8", fontSize: 14 }}>
               Aucun travail sauvegarde pour le moment.
