@@ -509,7 +509,7 @@ export default function Dashboard() {
       if (!isMounted) return;
 
       if (!data.user) {
-        navigate("/login");
+        navigate("/");
         return;
       }
       setUser(data.user);
@@ -600,7 +600,7 @@ export default function Dashboard() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    navigate("/login");
+    navigate("/");
   };
 
   const handleCodeChange = (nextCode) => {
