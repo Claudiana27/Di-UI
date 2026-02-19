@@ -6,13 +6,14 @@ import {
   Typography,
   Avatar,
   Button,
+  IconButton,
+  Tooltip,
   Menu,
   MenuItem,
   Divider,
   ListItemIcon,
   ListItemText,
   Chip,
-  TextField,
   Paper,
   Drawer,
   List,
@@ -25,6 +26,10 @@ import FolderRoundedIcon from "@mui/icons-material/FolderRounded";
 import DeleteRoundedIcon from "@mui/icons-material/DeleteRounded";
 import PhoneIphoneRoundedIcon from "@mui/icons-material/PhoneIphoneRounded";
 import DesktopWindowsRoundedIcon from "@mui/icons-material/DesktopWindowsRounded";
+import ContentCopyRoundedIcon from "@mui/icons-material/ContentCopyRounded";
+import AutoFixHighRoundedIcon from "@mui/icons-material/AutoFixHighRounded";
+import SaveRoundedIcon from "@mui/icons-material/SaveRounded";
+import ArchiveRoundedIcon from "@mui/icons-material/ArchiveRounded";
 import { useNavigate } from "react-router-dom";
 import { zipSync, strToU8 } from "fflate";
 import { supabase } from "../lib/supabase";
@@ -37,9 +42,13 @@ const frameworks = [
 ];
 
 const previewModes = [
-  { key: "desktop", label: "Desktop", width: "100%", icon: <DesktopWindowsRoundedIcon sx={{ fontSize: 16 }} /> },
-  { key: "mobile", label: "Mobile", width: 390, icon: <PhoneIphoneRoundedIcon sx={{ fontSize: 16 }} /> },
+  { key: "desktop", label: "Desktop", icon: <DesktopWindowsRoundedIcon sx={{ fontSize: 16 }} /> },
+  { key: "mobile", label: "Mobile", icon: <PhoneIphoneRoundedIcon sx={{ fontSize: 16 }} /> },
 ];
+const previewViewportByMode = {
+  desktop: { width: 1366, height: 768 },
+  mobile: { width: 390, height: 844 },
+};
 
 const themePresets = [
   {
@@ -309,6 +318,16 @@ const templateCatalog = {
   ],
   login: [
     {
+      id: "monprojet",
+      label: "Mon projet",
+      templates: {
+        html: `<!doctype html><html lang="fr"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><style>body{margin:0;min-height:100vh;display:grid;place-items:center;font-family:"Space Grotesk","Segoe UI",sans-serif;background:linear-gradient(120deg,#0f1f54 0%,#020617 45%,#14384a 100%)}.card{width:min(1000px,94vw);display:grid;grid-template-columns:1fr 1.15fr;gap:34px;padding:36px;border-radius:24px;background:linear-gradient(120deg,rgba(15,23,42,.86),rgba(7,18,40,.74));border:1px solid rgba(56,189,248,.12)}.left{display:grid;place-items:center}.logo{width:min(360px,78vw);aspect-ratio:1/1;border-radius:50%;background:#e5e7eb;display:grid;place-items:center}.logo img{width:63%;height:auto}.title{margin:0 0 18px;font-size:52px;line-height:1;color:#e2f6ff}.line{margin-bottom:22px}.line label{display:block;color:#cbd5e1;margin-bottom:8px}.line input{width:100%;border:none;border-bottom:1px solid rgba(148,163,184,.45);padding:8px 0;background:transparent;color:#f8fafc;outline:none}.row{display:flex;justify-content:space-between;align-items:center;gap:14px}.help{color:#7dd3fc;text-decoration:none}.cta{border:none;border-radius:999px;padding:10px 26px;color:#f8fafc;background:linear-gradient(100deg,#0ea5e9,#14b8a6);font-weight:700}.or{display:flex;align-items:center;gap:12px;color:#dbeafe;margin:20px 0}.or:before,.or:after{content:"";flex:1;height:1px;background:rgba(148,163,184,.45)}.ghost{width:100%;padding:11px;border-radius:999px;border:1px solid rgba(56,189,248,.45);background:transparent;color:#f8fafc}.wrap{max-width:540px}@media (max-width:900px){.card{grid-template-columns:1fr;padding:22px}.logo{width:min(220px,62vw)}.title{font-size:42px;margin-top:8px}}</style></head><body><section class="card"><div class="left"><div class="logo"><img src="/logo-diana.png" alt="logo" /></div></div><div class="wrap"><h1 class="title">Log In</h1><div class="line"><label>Email</label><input placeholder="example@email.com" /></div><div class="line"><label>Password</label><input type="password" placeholder="********" /></div><div class="row"><a class="help" href="#">Forgot Password?</a><button class="cta" type="button">LOGIN</button></div><div class="or">or</div><button class="ghost" type="button">CONTINUER AVEC GOOGLE</button></div></section></body></html>`,
+        react: `const App = () => <main style={{margin:0,minHeight:"100vh",display:"grid",placeItems:"center",fontFamily:'"Space Grotesk","Segoe UI",sans-serif',background:"linear-gradient(120deg,#0f1f54 0%,#020617 45%,#14384a 100%)"}}><section style={{width:"min(1000px,94vw)",display:"grid",gridTemplateColumns:"1fr 1.15fr",gap:34,padding:36,borderRadius:24,background:"linear-gradient(120deg,rgba(15,23,42,.86),rgba(7,18,40,.74))",border:"1px solid rgba(56,189,248,.12)"}}><div style={{display:"grid",placeItems:"center"}}><div style={{width:"min(360px,78vw)",aspectRatio:"1/1",borderRadius:"50%",background:"#e5e7eb",display:"grid",placeItems:"center"}}><img src="/logo-diana.png" alt="logo" style={{width:"63%",height:"auto"}}/></div></div><div style={{maxWidth:540}}><h1 style={{margin:"0 0 18px",fontSize:52,lineHeight:1,color:"#e2f6ff"}}>Log In</h1><div style={{marginBottom:22}}><label style={{display:"block",color:"#cbd5e1",marginBottom:8}}>Email</label><input placeholder="example@email.com" style={{width:"100%",border:"none",borderBottom:"1px solid rgba(148,163,184,.45)",padding:"8px 0",background:"transparent",color:"#f8fafc",outline:"none"}}/></div><div style={{marginBottom:22}}><label style={{display:"block",color:"#cbd5e1",marginBottom:8}}>Password</label><input type="password" placeholder="********" style={{width:"100%",border:"none",borderBottom:"1px solid rgba(148,163,184,.45)",padding:"8px 0",background:"transparent",color:"#f8fafc",outline:"none"}}/></div><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:14}}><a href="#" style={{color:"#7dd3fc",textDecoration:"none"}}>Forgot Password?</a><button type="button" style={{border:"none",borderRadius:999,padding:"10px 26px",color:"#f8fafc",background:"linear-gradient(100deg,#0ea5e9,#14b8a6)",fontWeight:700}}>LOGIN</button></div><div style={{display:"flex",alignItems:"center",gap:12,color:"#dbeafe",margin:"20px 0"}}><span style={{flex:1,height:1,background:"rgba(148,163,184,.45)"}}/><span>or</span><span style={{flex:1,height:1,background:"rgba(148,163,184,.45)"}}/></div><button type="button" style={{width:"100%",padding:11,borderRadius:999,border:"1px solid rgba(56,189,248,.45)",background:"transparent",color:"#f8fafc"}}>CONTINUER AVEC GOOGLE</button></div></section></main>;`,
+        vue: `const App = { template: '<main style="margin:0;min-height:100vh;display:grid;place-items:center;font-family:Space Grotesk,Segoe UI,sans-serif;background:linear-gradient(120deg,#0f1f54 0%,#020617 45%,#14384a 100%)"><section style="width:min(1000px,94vw);display:grid;grid-template-columns:1fr 1.15fr;gap:34px;padding:36px;border-radius:24px;background:linear-gradient(120deg,rgba(15,23,42,.86),rgba(7,18,40,.74));border:1px solid rgba(56,189,248,.12)"><div style="display:grid;place-items:center"><div style="width:min(360px,78vw);aspect-ratio:1/1;border-radius:50%;background:#e5e7eb;display:grid;place-items:center"><img src="/logo-diana.png" alt="logo" style="width:63%;height:auto"/></div></div><div style="max-width:540px"><h1 style="margin:0 0 18px;font-size:52px;line-height:1;color:#e2f6ff">Log In</h1><div style="margin-bottom:22px"><label style="display:block;color:#cbd5e1;margin-bottom:8px">Email</label><input placeholder="example@email.com" style="width:100%;border:none;border-bottom:1px solid rgba(148,163,184,.45);padding:8px 0;background:transparent;color:#f8fafc;outline:none"/></div><div style="margin-bottom:22px"><label style="display:block;color:#cbd5e1;margin-bottom:8px">Password</label><input type="password" placeholder="********" style="width:100%;border:none;border-bottom:1px solid rgba(148,163,184,.45);padding:8px 0;background:transparent;color:#f8fafc;outline:none"/></div><div style="display:flex;justify-content:space-between;align-items:center;gap:14px"><a href="#" style="color:#7dd3fc;text-decoration:none">Forgot Password?</a><button type="button" style="border:none;border-radius:999px;padding:10px 26px;color:#f8fafc;background:linear-gradient(100deg,#0ea5e9,#14b8a6);font-weight:700">LOGIN</button></div><div style="display:flex;align-items:center;gap:12px;color:#dbeafe;margin:20px 0"><span style="flex:1;height:1px;background:rgba(148,163,184,.45)"></span><span>or</span><span style="flex:1;height:1px;background:rgba(148,163,184,.45)"></span></div><button type="button" style="width:100%;padding:11px;border-radius:999px;border:1px solid rgba(56,189,248,.45);background:transparent;color:#f8fafc">CONTINUER AVEC GOOGLE</button></div></section></main>' };`,
+        next: `const Page = () => <main style={{margin:0,minHeight:"100vh",display:"grid",placeItems:"center",fontFamily:'"Space Grotesk","Segoe UI",sans-serif',background:"linear-gradient(120deg,#0f1f54 0%,#020617 45%,#14384a 100%)"}}><section style={{width:"min(1000px,94vw)",display:"grid",gridTemplateColumns:"1fr 1.15fr",gap:34,padding:36,borderRadius:24,background:"linear-gradient(120deg,rgba(15,23,42,.86),rgba(7,18,40,.74))",border:"1px solid rgba(56,189,248,.12)"}}><div style={{display:"grid",placeItems:"center"}}><div style={{width:"min(360px,78vw)",aspectRatio:"1/1",borderRadius:"50%",background:"#e5e7eb",display:"grid",placeItems:"center"}}><img src="/logo-diana.png" alt="logo" style={{width:"63%",height:"auto"}}/></div></div><div style={{maxWidth:540}}><h1 style={{margin:"0 0 18px",fontSize:52,lineHeight:1,color:"#e2f6ff"}}>Log In</h1><div style={{marginBottom:22}}><label style={{display:"block",color:"#cbd5e1",marginBottom:8}}>Email</label><input placeholder="example@email.com" style={{width:"100%",border:"none",borderBottom:"1px solid rgba(148,163,184,.45)",padding:"8px 0",background:"transparent",color:"#f8fafc",outline:"none"}}/></div><div style={{marginBottom:22}}><label style={{display:"block",color:"#cbd5e1",marginBottom:8}}>Password</label><input type="password" placeholder="********" style={{width:"100%",border:"none",borderBottom:"1px solid rgba(148,163,184,.45)",padding:"8px 0",background:"transparent",color:"#f8fafc",outline:"none"}}/></div><div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:14}}><a href="#" style={{color:"#7dd3fc",textDecoration:"none"}}>Forgot Password?</a><button type="button" style={{border:"none",borderRadius:999,padding:"10px 26px",color:"#f8fafc",background:"linear-gradient(100deg,#0ea5e9,#14b8a6)",fontWeight:700}}>LOGIN</button></div><div style={{display:"flex",alignItems:"center",gap:12,color:"#dbeafe",margin:"20px 0"}}><span style={{flex:1,height:1,background:"rgba(148,163,184,.45)"}}/><span>or</span><span style={{flex:1,height:1,background:"rgba(148,163,184,.45)"}}/></div><button type="button" style={{width:"100%",padding:11,borderRadius:999,border:"1px solid rgba(56,189,248,.45)",background:"transparent",color:"#f8fafc"}}>CONTINUER AVEC GOOGLE</button></div></section></main>;`,
+      },
+    },
+    {
       id: "card",
       label: "Card",
       templates: {
@@ -349,6 +368,7 @@ const buildPreviewDoc = (framework, code) => {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>html,body,#app{height:100%;overflow:hidden}</style>
   <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
 </head>
 <body style="margin:0">
@@ -370,6 +390,7 @@ const buildPreviewDoc = (framework, code) => {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>html,body,#root{height:100%;overflow:hidden}</style>
   <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -416,12 +437,75 @@ const formatHtml = (input) => {
   return formatted.join("\n");
 };
 
+const insertJsLineBreaks = (input) => {
+  let result = "";
+  let inSingle = false;
+  let inDouble = false;
+  let inTemplate = false;
+  let inLineComment = false;
+  let inBlockComment = false;
+  let escaped = false;
+
+  for (let i = 0; i < input.length; i += 1) {
+    const char = input[i];
+    const next = input[i + 1];
+
+    if (inLineComment) {
+      result += char;
+      if (char === "\n") inLineComment = false;
+      continue;
+    }
+
+    if (inBlockComment) {
+      result += char;
+      if (char === "*" && next === "/") {
+        result += "/";
+        i += 1;
+        inBlockComment = false;
+      }
+      continue;
+    }
+
+    if (!inSingle && !inDouble && !inTemplate && char === "/" && next === "/") {
+      result += "//";
+      i += 1;
+      inLineComment = true;
+      continue;
+    }
+
+    if (!inSingle && !inDouble && !inTemplate && char === "/" && next === "*") {
+      result += "/*";
+      i += 1;
+      inBlockComment = true;
+      continue;
+    }
+
+    result += char;
+
+    if (!escaped) {
+      if (!inDouble && !inTemplate && char === "'") inSingle = !inSingle;
+      else if (!inSingle && !inTemplate && char === '"') inDouble = !inDouble;
+      else if (!inSingle && !inDouble && char === "`") inTemplate = !inTemplate;
+    }
+
+    if (char === "\\" && (inSingle || inDouble || inTemplate)) {
+      escaped = !escaped;
+    } else {
+      escaped = false;
+    }
+
+    if (!inSingle && !inDouble && !inTemplate && (char === ";" || char === "{" || char === "}")) {
+      result += "\n";
+    }
+  }
+
+  return result;
+};
+
 const formatJsLike = (input) => {
-  const prepared = input
-    .replace(/;\s*(?=[^\n])/g, ";\n")
-    .replace(/{\s*(?=[^\n])/g, "{\n")
-    .replace(/}\s*(?=[^\n])/g, "}\n");
-  const lines = prepared.split("\n");
+  const lines = insertJsLineBreaks(input)
+    .replace(/>\s*</g, ">\n<")
+    .split("\n");
   let indent = 0;
   const result = [];
 
@@ -439,7 +523,7 @@ const formatJsLike = (input) => {
     indent = Math.max(indent + opens - closes, 0);
   });
 
-  return result.join("\n");
+  return result.join("\n").replace(/\n{3,}/g, "\n\n");
 };
 
 const formatCodeByFramework = (framework, input) => {
@@ -516,6 +600,9 @@ export default function Dashboard() {
   const [themeKey, setThemeKey] = React.useState("ocean");
   const [cloudMessage, setCloudMessage] = React.useState("");
   const [mobilePanel, setMobilePanel] = React.useState("preview");
+  const codeTextareaRef = React.useRef(null);
+  const previewHostRef = React.useRef(null);
+  const [previewScale, setPreviewScale] = React.useState(1);
 
   React.useEffect(() => {
     let isMounted = true;
@@ -610,8 +697,8 @@ export default function Dashboard() {
     "";
 
   const previewDoc = React.useMemo(() => buildPreviewDoc(framework, code), [framework, code]);
-  const previewWidth = previewModes.find((item) => item.key === previewMode)?.width || "100%";
   const currentTheme = themePresets.find((item) => item.key === themeKey) || themePresets[0];
+  const activeViewport = previewViewportByMode[previewMode] || previewViewportByMode.desktop;
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -623,6 +710,36 @@ export default function Dashboard() {
     const key = comboKey(category, styleId, framework);
     setCustomCodes((prev) => ({ ...prev, [key]: nextCode }));
   };
+
+  React.useEffect(() => {
+    const area = codeTextareaRef.current;
+    if (!area) return;
+    area.style.height = "auto";
+    area.style.height = `${area.scrollHeight}px`;
+  }, [code, framework, styleId, category, mobilePanel]);
+
+  React.useEffect(() => {
+    const host = previewHostRef.current;
+    if (!host) return;
+
+    const computeScale = () => {
+      const rect = host.getBoundingClientRect();
+      const scaleX = rect.width / activeViewport.width;
+      const scaleY = rect.height / activeViewport.height;
+      const nextScale = Math.min(scaleX, scaleY, 1);
+      setPreviewScale(nextScale > 0 ? nextScale : 1);
+    };
+
+    computeScale();
+    const observer = new ResizeObserver(computeScale);
+    observer.observe(host);
+    window.addEventListener("resize", computeScale);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", computeScale);
+    };
+  }, [activeViewport.height, activeViewport.width, previewMode, mobilePanel]);
 
   const handleCopyCode = async () => {
     await navigator.clipboard.writeText(code);
@@ -839,7 +956,7 @@ export default function Dashboard() {
         </Toolbar>
       </AppBar>
 
-      <Box sx={{ pt: "88px", px: { xs: 2, md: 3 }, pb: 3 }}>
+      <Box sx={{ pt: "88px", px: { xs: 2, md: 3 }, pb: 3, overflowX: "hidden" }}>
         <Box sx={{ display: "flex", justifyContent: "center", flexWrap: "wrap", gap: 1, mb: 1.2 }}>
           {categories.map((item) => (
             <Chip
@@ -996,32 +1113,124 @@ export default function Dashboard() {
               overflow: "hidden",
               border: "1px solid rgba(125, 211, 252, 0.24)",
               background: "rgba(15, 23, 42, 0.62)",
-              minHeight: { xs: "52dvh", lg: "calc(100dvh - 230px)" },
+              minHeight: { xs: "54dvh", lg: "calc(100dvh - 230px)" },
             }}
           >
             <Box sx={{ px: 2, py: 1.2, borderBottom: "1px solid rgba(125, 211, 252, 0.2)" }}>
               <Typography fontWeight={700}>Rendu Live ({framework})</Typography>
             </Box>
-            <Box sx={{ height: { xs: "calc(52dvh - 49px)", lg: "calc(100% - 49px)" }, p: 1.2, display: "grid", placeItems: "center" }}>
-              <Box
-                sx={{
-                  width: previewWidth,
-                  height: "100%",
-                  maxWidth: "100%",
-                  borderRadius: previewMode === "desktop" ? 1 : 3,
-                  overflow: "hidden",
-                  border: previewMode === "desktop" ? "none" : "1px solid rgba(125, 211, 252, 0.32)",
-                  boxShadow: previewMode === "desktop" ? "none" : "0 12px 26px rgba(2, 6, 23, 0.48)",
-                  transition: "all .2s ease",
-                }}
-              >
-                <iframe
-                  title="preview"
-                  srcDoc={previewDoc}
-                  sandbox="allow-scripts allow-modals"
-                  style={{ width: "100%", height: "100%", border: 0, background: "white" }}
-                />
-              </Box>
+            <Box sx={{ height: { xs: "calc(54dvh - 49px)", lg: "calc(100% - 49px)" }, p: { xs: 1, md: 1.4 }, display: "grid", placeItems: "center", overflow: "hidden" }}>
+              {previewMode === "desktop" ? (
+                <Box
+                  sx={{
+                    width: "min(980px, 100%)",
+                    height: "min(100%, 520px)",
+                    borderRadius: 2.5,
+                    border: "1px solid rgba(148, 163, 184, 0.34)",
+                    background: "linear-gradient(180deg,#0f172a,#0b1020)",
+                    p: 1.2,
+                    boxShadow: "0 22px 38px rgba(2, 6, 23, 0.52)",
+                    display: "flex",
+                    flexDirection: "column",
+                    overflow: "hidden",
+                    gap: 1,
+                  }}
+                >
+                  <Box sx={{ height: 24, borderRadius: 99, background: "rgba(148, 163, 184, 0.2)", px: 1.2, display: "flex", alignItems: "center", gap: 0.6 }}>
+                    <Box sx={{ width: 7, height: 7, borderRadius: "50%", bgcolor: "#f87171" }} />
+                    <Box sx={{ width: 7, height: 7, borderRadius: "50%", bgcolor: "#fbbf24" }} />
+                    <Box sx={{ width: 7, height: 7, borderRadius: "50%", bgcolor: "#34d399" }} />
+                  </Box>
+                  <Box
+                    ref={previewHostRef}
+                    sx={{
+                      flex: 1,
+                      borderRadius: 1.8,
+                      overflow: "hidden",
+                      bgcolor: "#fff",
+                      border: "1px solid rgba(203, 213, 225, 0.7)",
+                      position: "relative",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        width: `${activeViewport.width}px`,
+                        height: `${activeViewport.height}px`,
+                        transform: `translate(-50%, -50%) scale(${previewScale})`,
+                        transformOrigin: "center center",
+                      }}
+                    >
+                      <iframe
+                        title="preview"
+                        srcDoc={previewDoc}
+                        sandbox="allow-scripts allow-modals"
+                        scrolling="no"
+                        style={{
+                          width: `${activeViewport.width}px`,
+                          height: `${activeViewport.height}px`,
+                          border: 0,
+                          background: "white",
+                        }}
+                      />
+                    </Box>
+                  </Box>
+                </Box>
+              ) : (
+                <Box
+                  sx={{
+                    width: "min(390px, 92vw)",
+                    height: "min(100%, 560px)",
+                    borderRadius: "34px",
+                    border: "1px solid rgba(148, 163, 184, 0.35)",
+                    background: "linear-gradient(180deg,#0f172a,#0b1020)",
+                    boxShadow: "0 20px 36px rgba(2, 6, 23, 0.52)",
+                    p: "10px 8px",
+                    position: "relative",
+                    overflow: "hidden",
+                  }}
+                >
+                  <Box sx={{ position: "absolute", top: 4, left: "50%", transform: "translateX(-50%)", width: 94, height: 16, borderRadius: 99, background: "#020617", border: "1px solid rgba(148, 163, 184, 0.35)", zIndex: 2 }} />
+                  <Box
+                    ref={previewHostRef}
+                    sx={{
+                      height: "100%",
+                      borderRadius: "24px",
+                      overflow: "hidden",
+                      bgcolor: "#fff",
+                      border: "1px solid rgba(203, 213, 225, 0.8)",
+                      position: "relative",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: "50%",
+                        left: "50%",
+                        width: `${activeViewport.width}px`,
+                        height: `${activeViewport.height}px`,
+                        transform: `translate(-50%, -50%) scale(${previewScale})`,
+                        transformOrigin: "center center",
+                      }}
+                    >
+                      <iframe
+                        title="preview"
+                        srcDoc={previewDoc}
+                        sandbox="allow-scripts allow-modals"
+                        scrolling="no"
+                        style={{
+                          width: `${activeViewport.width}px`,
+                          height: `${activeViewport.height}px`,
+                          border: 0,
+                          background: "white",
+                        }}
+                      />
+                    </Box>
+                  </Box>
+                </Box>
+              )}
             </Box>
           </Paper>
 
@@ -1033,82 +1242,109 @@ export default function Dashboard() {
               background: "rgba(15, 23, 42, 0.62)",
               minHeight: { xs: "60dvh", lg: "calc(100dvh - 230px)" },
               flexDirection: "column",
+              overflow: "hidden",
             }}
           >
+            <Box
+              sx={{
+                px: 2,
+                py: 1.2,
+                borderBottom: "1px solid rgba(125, 211, 252, 0.2)",
+                display: "flex",
+                justifyContent: "space-between",
+                gap: 1,
+                flexWrap: "wrap",
+              }}
+            >
+              <Typography fontWeight={700}>Code editable</Typography>
               <Box
                 sx={{
-                  px: 2,
-                  py: 1.2,
-                  borderBottom: "1px solid rgba(125, 211, 252, 0.2)",
                   display: "flex",
-                  justifyContent: "space-between",
                   gap: 1,
+                  width: { xs: "100%", sm: "auto" },
+                  justifyContent: { xs: "space-between", sm: "flex-end" },
                   flexWrap: "wrap",
                 }}
               >
-                <Typography fontWeight={700}>Code editable</Typography>
-              <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", width: { xs: "100%", sm: "auto" } }}>
-                <Button
-                  size="small"
-                  onClick={handleCopyCode}
-                  sx={{ borderRadius: 999, color: "#dbeafe", border: "1px solid rgba(125, 211, 252, 0.35)" }}
-                >
-                  {copyLabel}
-                </Button>
-                <Button
-                  size="small"
-                  onClick={handleFormatCode}
-                  sx={{ borderRadius: 999, color: "#dbeafe", border: "1px solid rgba(125, 211, 252, 0.35)" }}
-                >
-                  Formater
-                </Button>
-                <Button
-                  size="small"
-                  onClick={handleSaveCurrentWork}
-                  sx={{
-                    borderRadius: 999,
-                    color: "#dbeafe",
-                    border: "1px solid rgba(125, 211, 252, 0.35)",
-                  }}
-                >
-                  {saveLabel}
-                </Button>
-                <Button
-                  size="small"
-                  onClick={handleDownloadZip}
-                  sx={{
-                    borderRadius: 999,
-                    color: "white",
-                    background: `linear-gradient(100deg, ${currentTheme.gradient[0]}, ${currentTheme.gradient[1]})`,
-                  }}
-                >
-                  Export .zip
-                </Button>
+                <Tooltip title={copyLabel}>
+                  <IconButton
+                    size="small"
+                    onClick={handleCopyCode}
+                    sx={{
+                      color: "#dbeafe",
+                      border: "1px solid rgba(125, 211, 252, 0.35)",
+                      background: "rgba(15, 23, 42, 0.55)",
+                    }}
+                  >
+                    <ContentCopyRoundedIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Formater">
+                  <IconButton
+                    size="small"
+                    onClick={handleFormatCode}
+                    sx={{
+                      color: "#dbeafe",
+                      border: "1px solid rgba(125, 211, 252, 0.35)",
+                      background: "rgba(15, 23, 42, 0.55)",
+                    }}
+                  >
+                    <AutoFixHighRoundedIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title={saveLabel}>
+                  <IconButton
+                    size="small"
+                    onClick={handleSaveCurrentWork}
+                    sx={{
+                      color: "#dbeafe",
+                      border: "1px solid rgba(125, 211, 252, 0.35)",
+                      background: "rgba(15, 23, 42, 0.55)",
+                    }}
+                  >
+                    <SaveRoundedIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Exporter .zip">
+                  <IconButton
+                    size="small"
+                    onClick={handleDownloadZip}
+                    sx={{
+                      color: "white",
+                      background: `linear-gradient(100deg, ${currentTheme.gradient[0]}, ${currentTheme.gradient[1]})`,
+                    }}
+                  >
+                    <ArchiveRoundedIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
               </Box>
             </Box>
-            <TextField
-              multiline
-              value={code}
-              onChange={(e) => handleCodeChange(e.target.value)}
-              variant="standard"
-              fullWidth
-              InputProps={{
-                disableUnderline: true,
-                sx: {
-                  p: 2,
+            <Box sx={{ p: 2 }}>
+              <Box
+                component="textarea"
+                ref={codeTextareaRef}
+                value={code}
+                onChange={(e) => handleCodeChange(e.target.value)}
+                spellCheck={false}
+                style={{
+                  width: "100%",
+                  minHeight: "calc(60dvh - 120px)",
+                  height: "auto",
+                  resize: "none",
+                  overflow: "hidden",
+                  borderRadius: "14px",
+                  border: "1px solid rgba(125, 211, 252, 0.24)",
+                  background: "rgba(2, 6, 23, 0.55)",
                   color: "#e2e8f0",
+                  padding: "14px",
                   fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
-                  fontSize: { xs: 12, md: 13 },
-                  alignItems: "flex-start",
-                  height: { xs: "calc(60dvh - 80px)", lg: "calc(100dvh - 280px)" },
-                  overflow: "auto",
-                  "& textarea": {
-                    whiteSpace: "pre",
-                    overflowX: "auto !important",
-                  },
-                },
-              }}
-            />
+                  fontSize: "13px",
+                  lineHeight: 1.45,
+                  outline: "none",
+                  whiteSpace: "pre",
+                }}
+              />
+            </Box>
           </Paper>
         </Box>
       </Box>

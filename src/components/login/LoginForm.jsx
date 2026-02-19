@@ -93,6 +93,7 @@ export default function LoginForm() {
           <TextField
             label="Password"
             name="password"
+            type="password"
             value={form.password}
             onChange={handleChange}
             fullWidth
@@ -115,7 +116,7 @@ export default function LoginForm() {
             }}
           >
             <Typography sx={{ fontSize: 13, textAlign: { xs: "center", sm: "left" } }}>
-              <a href="">Forgot Password?</a>
+              <a href="#">Forgot Password?</a>
             </Typography>
             <Button
               type="submit"
