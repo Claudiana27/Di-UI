@@ -515,6 +515,7 @@ export default function Dashboard() {
   const [saveLabel, setSaveLabel] = React.useState("Sauvegarder");
   const [themeKey, setThemeKey] = React.useState("ocean");
   const [cloudMessage, setCloudMessage] = React.useState("");
+  const [mobilePanel, setMobilePanel] = React.useState("preview");
 
   React.useEffect(() => {
     let isMounted = true;
@@ -869,7 +870,8 @@ export default function Dashboard() {
             sx: {
               mt: 1,
               p: 1.2,
-              minWidth: { xs: 300, sm: 430 },
+              minWidth: { xs: "calc(100vw - 32px)", sm: 430 },
+              maxWidth: { xs: "calc(100vw - 32px)", sm: 520 },
               border: "1px solid rgba(125, 211, 252, 0.2)",
               background: "rgba(2, 6, 23, 0.94)",
               color: "#e2e8f0",
@@ -957,20 +959,50 @@ export default function Dashboard() {
           ))}
         </Box>
 
+        <Box sx={{ display: { xs: "flex", lg: "none" }, justifyContent: "center", gap: 1, mb: 2 }}>
+          <Chip
+            label="Rendu"
+            onClick={() => setMobilePanel("preview")}
+            sx={{
+              borderRadius: 999,
+              color: mobilePanel === "preview" ? "#082f49" : "#dbeafe",
+              background:
+                mobilePanel === "preview"
+                  ? "linear-gradient(100deg, #bfdbfe, #67e8f9)"
+                  : "rgba(15, 23, 42, 0.78)",
+              border: "1px solid rgba(125, 211, 252, 0.28)",
+            }}
+          />
+          <Chip
+            label="Code"
+            onClick={() => setMobilePanel("code")}
+            sx={{
+              borderRadius: 999,
+              color: mobilePanel === "code" ? "#082f49" : "#dbeafe",
+              background:
+                mobilePanel === "code"
+                  ? "linear-gradient(100deg, #bfdbfe, #67e8f9)"
+                  : "rgba(15, 23, 42, 0.78)",
+              border: "1px solid rgba(125, 211, 252, 0.28)",
+            }}
+          />
+        </Box>
+
         <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" }, gap: 2 }}>
           <Paper
             sx={{
+              display: { xs: mobilePanel === "preview" ? "block" : "none", lg: "block" },
               borderRadius: 3,
               overflow: "hidden",
               border: "1px solid rgba(125, 211, 252, 0.24)",
               background: "rgba(15, 23, 42, 0.62)",
-              minHeight: { xs: 360, lg: "calc(100dvh - 230px)" },
+              minHeight: { xs: "52dvh", lg: "calc(100dvh - 230px)" },
             }}
           >
             <Box sx={{ px: 2, py: 1.2, borderBottom: "1px solid rgba(125, 211, 252, 0.2)" }}>
               <Typography fontWeight={700}>Rendu Live ({framework})</Typography>
             </Box>
-            <Box sx={{ height: { xs: 320, lg: "calc(100% - 49px)" }, p: 1.2, display: "grid", placeItems: "center" }}>
+            <Box sx={{ height: { xs: "calc(52dvh - 49px)", lg: "calc(100% - 49px)" }, p: 1.2, display: "grid", placeItems: "center" }}>
               <Box
                 sx={{
                   width: previewWidth,
@@ -995,27 +1027,27 @@ export default function Dashboard() {
 
           <Paper
             sx={{
+              display: { xs: mobilePanel === "code" ? "flex" : "none", lg: "flex" },
               borderRadius: 3,
               border: "1px solid rgba(125, 211, 252, 0.24)",
               background: "rgba(15, 23, 42, 0.62)",
-              minHeight: { xs: 420, lg: "calc(100dvh - 230px)" },
-              display: "flex",
+              minHeight: { xs: "60dvh", lg: "calc(100dvh - 230px)" },
               flexDirection: "column",
             }}
           >
-            <Box
-              sx={{
-                px: 2,
-                py: 1.2,
-                borderBottom: "1px solid rgba(125, 211, 252, 0.2)",
-                display: "flex",
-                justifyContent: "space-between",
-                gap: 1,
-                flexWrap: "wrap",
-              }}
-            >
-              <Typography fontWeight={700}>Code editable</Typography>
-              <Box sx={{ display: "flex", gap: 1 }}>
+              <Box
+                sx={{
+                  px: 2,
+                  py: 1.2,
+                  borderBottom: "1px solid rgba(125, 211, 252, 0.2)",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: 1,
+                  flexWrap: "wrap",
+                }}
+              >
+                <Typography fontWeight={700}>Code editable</Typography>
+              <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", width: { xs: "100%", sm: "auto" } }}>
                 <Button
                   size="small"
                   onClick={handleCopyCode}
@@ -1066,10 +1098,14 @@ export default function Dashboard() {
                   p: 2,
                   color: "#e2e8f0",
                   fontFamily: "ui-monospace, SFMono-Regular, Menlo, monospace",
-                  fontSize: 13,
+                  fontSize: { xs: 12, md: 13 },
                   alignItems: "flex-start",
-                  height: { xs: 360, lg: "calc(100dvh - 280px)" },
+                  height: { xs: "calc(60dvh - 80px)", lg: "calc(100dvh - 280px)" },
                   overflow: "auto",
+                  "& textarea": {
+                    whiteSpace: "pre",
+                    overflowX: "auto !important",
+                  },
                 },
               }}
             />
